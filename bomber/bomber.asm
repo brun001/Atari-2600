@@ -107,6 +107,23 @@ StartFrame:
     REPEND
     sta VBLANK               ; desliga o VBLANK 
 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Mostra o placar de pontos                                                 ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    lda #0 ;limpa registros TIA antes cada frame
+    sta PF0  
+    sta PF1
+    sta PF2
+    sta GRP0
+    sta GRP1
+    sta COLUPF
+    REPEAT 20
+        sta WSYNC  ;mostra os 20 scanlines onde vai aparecer o  placar
+    REPEND
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Mostra as 96 scanlines visiveis do nosso jogo (contando com o kernel de 2 linhas)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -124,7 +141,7 @@ GameVisibleLine:
     lda #0
     sta PF2                  ; configurando o  padrao de bits do PF2
 
-    ldx #96                  ; X conta o numero restante de scanlines    
+    ldx #84                  ; X conta o numero restante de scanlines    
 .GameLineLoop:
 .AreWeInsideJetSprite:
     txa                      ; transfere X para A 
@@ -219,8 +236,12 @@ CheckP0Right:
 EndInputCheck:               ; finaliza quando nenhum input for pressionado
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Calculos para atualizar posicao no proximo frame 
+;; Calculos para atualizar posicao no proximo frame                          ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
 UpdateBomberPosition:
     lda BomberYPos
     clc
@@ -233,6 +254,35 @@ UpdateBomberPosition:
     sta BomberYPos
                               ; TODO: configurar a posicao X para o um numero aleatorio 
 EndPositionUpdate:           ; finaliza o codigo de atualizar posicao  
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Detectando colisões                                                       ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+CheckCollisionP0P1:
+    lda #%10000000	;CXPPMM detecta colisão do P0 e P1
+    bit CXPPMM                  ; testa o padrão de bits da colsão
+    bne .CollisionP0P1          ; se a colisão do P0 e P1 acontecer, Game Over
+    jmp CheckCollisionP0PF      ; senão. pula pro próximo teste
+.CollisionP0P1:
+    jsr GameOver                ; chama a subrotina do GameOver
+CheckCollisionP0PF:
+    lda #%10000000
+    bit CXP0FB
+    bne .CollisionP0PF
+    jmp EndCollisionCheck
+.CollisionP0PF:
+    jsr GameOver
+    
+EndCollisionCheck:
+    sta CXCLR
+    
+
+
+
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Voltar o  loop para um loop de um novo frame 
@@ -258,6 +308,15 @@ SetObjectXPos subroutine
     asl                      ; quatro movme para esquerda tendo somente 4 bits
     sta HMP0,Y              
     sta RESP0,Y              ; fix object position in 15-step increment
+    rts
+    
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Game Over Subrotina                                                       ;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+GameOver subroutine
+    lda #$30
+    sta COLUBK
     rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
