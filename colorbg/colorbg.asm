@@ -1,28 +1,28 @@
 	processor 6502
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Include external files containing useful definitions and macros 
+;; Incluir arquivos importantes como macros e definições           
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	include "vcs.h"
 	include "macro.h"
 
 	seg code
-	org $F000      ; Define the origin of the ROM at $F000
+	org $F000      ; Define a orgigem da ROM para $F000   
 	
 START:
-	CLEAN_START    ; Call macro to safely clear the memory
+	CLEAN_START    ; Chama o macro para limpar a memoria    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Set background luminance color to yellow (NTSC color code $1E)
+;; Muda a cor para amarelo                                          
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    lda #$1A       ; Load color code into A register
-    sta COLUBK     ; Store A to memory address $09 (TIA COLUBK)
+    lda #$1A       ; Carrega codigo da cor dentro do Registro A
+    sta COLUBK     ; Guarda A para endereço $09 (COLUBK)         
 
-    jmp START      ; Repeat from START
+    jmp START      ; Loop para o Inicio 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Fill ROM size to exactly 4KB
+;; Preenche a ROM para exatos 4KB
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    org $FFFC      ; Defines origin to $FFFC
-    .word START    ; Reset vector at $FFFC (where program starts)
-    .word START    ; Interrupt vector at $FFFE (unused by the VCS)
+    org $FFFC                                    
+    .word START                                                      
+    .word START                                                       
